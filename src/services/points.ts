@@ -11,7 +11,7 @@ interface Point {
   items: number[];
 };
 
-const createPoint = (data: Point) => api.post('points', data);
+const createPoint = (data: FormData) => api.post('points', data);
 
 export {
   createPoint,

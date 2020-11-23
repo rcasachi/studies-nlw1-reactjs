@@ -4,12 +4,13 @@ import { FiArrowLeft } from 'react-icons/fi';
 import { Map, TileLayer, Marker } from 'react-leaflet';
 import { LeafletMouseEvent } from 'leaflet';
 
-import './styles.css';
-import logo from '../../assets/logo.svg';
-import { Fieldset, Input, ItemsList, Select } from '../../components';
+import { Dropzone, Fieldset, Input, ItemsList, Select } from '../../components';
 import { getItems } from '../../services/items';
 import { createPoint } from '../../services/points';
 import { getIbgeStates, getIbgeCities } from '../../services/ibge';
+
+import logo from '../../assets/logo.svg';
+import './styles.css';
 
 const CreatePoint = () => {
   const [items, setItems] = useState([]);
@@ -28,6 +29,7 @@ const CreatePoint = () => {
   const [selectedCity, setSelectedCity] = useState(''); 
   const [selectedItems, setSelectedItems] = useState<number[]>([]); 
   const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0, 0]);
+  const [selectedFile, setSelectedFile] = useState<File>();
 
   const history = useHistory();
 
@@ -95,16 +97,20 @@ const CreatePoint = () => {
     const { name, email, whatsapp } = formData;
     const [latitude, longitude] = selectedPosition;
 
-    const data = {
-      name,
-      email,
-      whatsapp,
-      latitude,
-      longitude,
-      city: selectedCity,
-      state: selectedState,
-      items: selectedItems,
-    };
+    const data = new FormData();
+  
+    data.append('name', name);
+    data.append('email', email);
+    data.append('whatsapp', whatsapp);
+    data.append('latitude', String(latitude));
+    data.append('longitude', String(longitude));
+    data.append('city', selectedCity);
+    data.append('state', selectedState);
+    data.append('items', selectedItems.join(','));
+    
+    if (selectedFile) {
+      data.append('image', selectedFile);
+    }
     
     await createPoint(data);
 
@@ -124,6 +130,8 @@ const CreatePoint = () => {
 
       <form onSubmit={handleSubmit}>
         <h1>Cadastro do <br />ponto de coleta</h1>
+
+        <Dropzone onFileUploaded={setSelectedFile} />
 
         <Fieldset legend="Dados">
           <Input 
